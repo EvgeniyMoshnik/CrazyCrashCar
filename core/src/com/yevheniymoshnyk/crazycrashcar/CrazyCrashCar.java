@@ -14,16 +14,30 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.boontaran.games.StageGame;
+import com.yevheniymoshnyk.crazycrashcar.utils.GameCallback;
 
 
 public class CrazyCrashCar extends Game {
+
+	public static final int SHOW_BANNER = 1;
+	public static final int HIDE_BANNER = 2;
+	public static final int LOAD_INTERSTITIAL = 3;
+	public static final int SHOW_INTERSTITIAL = 4;
+	public static final int OPEN_MARKET = 5;
+	public static final int SHARE = 6;
 
 	private boolean loadingAssets = false;
 	private AssetManager assetManager;
 
 	public static TextureAtlas atlas;
 	public static BitmapFont font40;
-	
+
+	private GameCallback gameCallback;
+
+	public CrazyCrashCar(GameCallback gameCallback) {
+		this.gameCallback = gameCallback;
+	}
+
 	@Override
 	public void create () {
 		StageGame.setAppSize(800, 400);
