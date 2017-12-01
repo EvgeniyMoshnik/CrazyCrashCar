@@ -1,5 +1,7 @@
 package com.yevheniymoshnyk.crazycrashcar;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +54,58 @@ public class AndroidLauncher extends AndroidApplication {
 		@Override
 		public void sendMessage(int message) {
 
+			if (message == CrazyCrashCar.SHOW_BANNER) {
+				AndroidLauncher.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+
+					}
+				});
+			} else {
+				if (message == CrazyCrashCar.HIDE_BANNER) {
+					AndroidLauncher.this.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+
+						}
+					});
+				} else if (message == CrazyCrashCar.LOAD_INTERSTITIAL) {
+
+					}
+					else {
+						if (message == CrazyCrashCar.SHOW_INTERSTITIAL) {
+							AndroidLauncher.this.runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+
+								}
+							});
+						} else {
+							if (message == CrazyCrashCar.OPEN_MARKET) {
+								Uri uri = Uri.parse(getString(R.string.share_uri));
+								Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+								startActivity(intent);
+							} else {
+								if (message == CrazyCrashCar.SHARE) {
+									Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+									sharingIntent.setType("text/plain");
+									String shareTitle = getString(R.string.share_title);
+									String shareBody = getString(R.string.share_body);
+
+									String uri = getResources().getString(R.string.share_uri);
+									String body = shareBody + uri;
+
+									sharingIntent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
+									sharingIntent.putExtra(Intent.EXTRA_SUBJECT, body);
+
+									startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)));
+
+								}
+							}
+						}
+
+				}
+			}
 		}
 	};
 }
