@@ -1,5 +1,8 @@
 package com.yevheniymoshnyk.crazycrashcar.player;
 
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -135,5 +138,30 @@ public class Player extends ActorClip implements IBody {
 
 
         return body;
+    }
+
+    private float[] traceOutline(String regionName) {
+
+        Texture bodyOutline = CrazyCrashCar.atlas.findRegion(regionName).getTexture();
+        TextureAtlas.AtlasRegion reg = CrazyCrashCar.atlas.findRegion(regionName);
+        int w = reg.getRegionWidth();
+        int h = reg.getRegionHeight();
+        int x = reg.getRegionX();
+        int y = reg.getRegionY();
+
+        bodyOutline.getTextureData().prepare();
+        Pixmap allPixmap = bodyOutline.getTextureData().consumePixmap();
+
+        Pixmap pixmap = new Pixmap(w, h, Pixmap.Format.RGBA8888);
+        pixmap.drawPixmap(allPixmap, 0 , 0, x, y, w, h);
+
+        allPixmap.dispose();
+
+        int pixel;
+
+        w = pixmap.getWidth();
+        h = pixmap.getHeight();
+
+        int map[][] = new int[w][h];
     }
 }
