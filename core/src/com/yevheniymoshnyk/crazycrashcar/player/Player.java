@@ -163,5 +163,7 @@ public class Player extends ActorClip implements IBody {
         h = pixmap.getHeight();
 
         int map[][] = new int[w][h];
+
+        return
     }
 }
