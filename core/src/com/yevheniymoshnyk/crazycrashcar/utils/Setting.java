@@ -9,5 +9,5 @@ public class Setting {
 
     public static final float GRAVITY = 8;
     public static final float JUMP_IMPULS = 80;
-    public static final float WHEEL_TOPQUE = 50;
+    public static final float WHEEL_TORQUE = 50;
 }

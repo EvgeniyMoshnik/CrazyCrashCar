@@ -3,20 +3,26 @@ package com.yevheniymoshnyk.crazycrashcar.player;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Joint;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.Array;
 import com.boontaran.games.ActorClip;
+import com.boontaran.marchingSquare.MarchingSquare;
 import com.yevheniymoshnyk.crazycrashcar.CrazyCrashCar;
 import com.yevheniymoshnyk.crazycrashcar.levels.Level;
 import com.yevheniymoshnyk.crazycrashcar.utils.Setting;
+
+import java.util.ArrayList;
 
 
 public class Player extends ActorClip implements IBody {
@@ -163,7 +169,50 @@ public class Player extends ActorClip implements IBody {
         h = pixmap.getHeight();
 
         int map[][] = new int[w][h];
+        for (x=0; x < w; x++) {
+            for (y = 0; y < h; y++) {
+                pixel = pixmap.getPixel(x, y);
+                if ((pixel & 0x000000ff) == 0) {
+                    map[x][y] = 0;
+                } else  {
+                    map[x][y] = 1;
+                }
+            }
+        }
 
-        return
+        pixmap.dispose();
+
+        MarchingSquare ms = new MarchingSquare(map);
+        ms.invertY();
+        ArrayList<float[]> traces = ms.traceMap();
+
+        float[] polyVertices = traces.get(0);
+        return polyVertices;
+    }
+
+    private Body createBodyFromTriangles(World world, Array<Polygon> triangles) {
+        BodyDef def = new BodyDef();
+        def.type = BodyDef.BodyType.DynamicBody;
+        def.linearDamping = 0;
+        Body body = world.createBody(def);
+
+        for (Polygon triangle: triangles) {
+            FixtureDef fDef = new FixtureDef();
+            PolygonShape shape = new PolygonShape();
+            shape.set(triangle.getTransformedVertices());
+
+            fDef.shape = shape;
+            fDef.restitution = 0;
+            fDef.density = 1;
+
+            body.createFixture(fDef);
+            shape.dispose();
+        }
+
+        return body;
+    }
+
+    public void onKey(boolean moveFrontKey, boolean moveBackKey) {
+        float torque = Setting.WHEEL_TORQUE;
     }
 }
