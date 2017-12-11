@@ -214,5 +214,27 @@ public class Player extends ActorClip implements IBody {
 
     public void onKey(boolean moveFrontKey, boolean moveBackKey) {
         float torque = Setting.WHEEL_TORQUE;
+        float maxAV = 18;
+
+        if (moveFrontKey) {
+            if (rearWheel.getAngularVelocity() < maxAV) {
+                rearWheel.applyTorque(torque, true);
+            }
+            if (frontWheel.getAngularVelocity() < maxAV) {
+                frontWheel.applyTorque(torque, true);
+            }
+        }
+        if (moveBackKey) {
+            if (rearWheel.getAngularVelocity() < maxAV) {
+                rearWheel.applyTorque(torque, true);
+            }
+            if (frontWheel.getAngularVelocity() < maxAV) {
+                frontWheel.applyTorque(torque, true);
+            }
+        }
+    }
+
+    public void jumpBack(float value) {
+
     }
 }
