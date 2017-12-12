@@ -33,7 +33,7 @@ public class Player extends ActorClip implements IBody {
 
     public Body car, frontWheel, rearWheel, driver;
 
-    private Joint frontWheelJoint, rearWheelJoint, driverWheelJoint;
+    private Joint frontWheelJoint, rearWheelJoint, driverJoint;
 
     private World world;
 
@@ -235,6 +235,90 @@ public class Player extends ActorClip implements IBody {
     }
 
     public void jumpBack(float value) {
+        if (value < 0.2f) value = 0.2f;
 
+        car.applyLinearImpulse(0, jumpImpulse * value,
+                car.getWorldCenter().x + 5 / Level.WORLD_SCALE,
+                car.getWorldCenter().y, true);
+        isTouchGround = false;
+        jumpWait = 0.3f;
+    }
+
+    public void jumpForward(float value) {
+        if (value < 0.2f) value = 0.2f;
+
+        car.applyLinearImpulse(0, jumpImpulse * value,
+                car.getWorldCenter().x - 4 / Level.WORLD_SCALE,
+                car.getWorldCenter().y, true);
+        isTouchGround = false;
+        jumpWait = 0.3f;
+    }
+
+    @Override
+    public void act(float delta) {
+
+        if (jumpWait > 0) {
+            jumpWait = delta;
+        }
+
+        if (destroyOnNextUpdate) {
+            destroyOnNextUpdate = false;
+            world.destroyJoint(frontWheelJoint);
+            world.destroyJoint(rearWheelJoint);
+            world.destroyJoint(driverJoint);
+            world.destroyBody(driver);
+            driverImage.remove();
+
+            driverFall();
+        }
+        super.act(delta);
+    }
+
+    private  void driverFall() {
+        BodyDef def = new BodyDef();
+        def.type = BodyDef.BodyType.DynamicBody;
+        def.linearDamping = 0;
+        def.angularDamping = 0;
+
+        def.position.x = driver.getPosition().x;
+        def.position.y = driver.getPosition().y;
+        def.angle = getRotation() * 3.1416f / 180;
+        def.angularVelocity = driver.getAngularVelocity();
+
+        Body body = world.createBody(def);
+
+        FixtureDef fDef = new FixtureDef();
+        CircleShape shape = new CircleShape();
+        shape.setRadius(10 / Level.WORLD_SCALE);
+
+        fDef.shape = shape;
+        fDef.restitution = 0.5f;
+        fDef.friction = 0.4f;
+        fDef.density = 1;
+        fDef.isSensor = true;
+
+        body.createFixture(fDef);
+
+        body.setLinearVelocity(car.getLinearVelocity());
+
+        shape.dispose();
+
+        level.addChild(driverFallCont);
+        driverFallCont.setPosition(getX(), getY());
+
+        UserData data = new UserData();
+        data.actor = driverFallCont;
+        body.setUserData(data);
+    }
+
+    public void destroy() {
+        if (hasDestroyed) return;
+        hasDestroyed = true;
+
+        destroyOnNextUpdate = true;
+    }
+
+    public boolean isHasDestroyed() {
+        return hasDestroyed;
     }
 }
