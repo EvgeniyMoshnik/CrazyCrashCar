@@ -15,6 +15,9 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.boontaran.games.StageGame;
+import com.yevheniymoshnyk.crazycrashcar.media.Media;
+import com.yevheniymoshnyk.crazycrashcar.screens.Intro;
+import com.yevheniymoshnyk.crazycrashcar.utils.Data;
 import com.yevheniymoshnyk.crazycrashcar.utils.GameCallback;
 
 import java.util.Locale;
@@ -39,6 +42,12 @@ public class CrazyCrashCar extends Game {
 	private String pathToAtlas;
 
 	private GameCallback gameCallback;
+
+	public static Media media;
+
+	private Intro intro;
+
+	public static Data data;
 
 	public CrazyCrashCar(GameCallback gameCallback) {
 		this.gameCallback = gameCallback;
@@ -77,6 +86,10 @@ public class CrazyCrashCar extends Game {
 		sizeParams.fontParameters.size = 40;
 
 		assetManager.load("font40.ttf", BitmapFont.class, sizeParams);
+
+		media = new Media(assetManager);
+
+		data = new Data();
 	}
 
 	@Override
@@ -99,9 +112,37 @@ public class CrazyCrashCar extends Game {
 	private void onAssetsLoaded() {
 		atlas = assetManager.get(pathToAtlas, TextureAtlas.class);
 		font40 = assetManager.get("font40.ttf", BitmapFont.class);
+
+		showIntro();
 	}
 
 	private void exitApp() {
+
 		Gdx.app.exit();
 	}
+
+	private void showIntro() {
+		intro = new Intro();
+		setScreen(intro);
+
+		intro.setCallback(new StageGame.Callback() {
+			@Override
+			public void call(int code) {
+				if (code == Intro.ON_PLAY) {
+					//showLevelList();
+					//hideIntro();
+				} else {
+					if (code == Intro.ON_BACK) {
+						exitApp();
+					}
+				}
+			}
+		});
+	}
+
+	private void hideIntro() {
+		intro = null;
+	}
+
+
 }

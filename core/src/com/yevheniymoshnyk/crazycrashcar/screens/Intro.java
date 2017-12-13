@@ -1,6 +1,7 @@
 package com.yevheniymoshnyk.crazycrashcar.screens;
 
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -62,6 +63,8 @@ public class Intro extends StageGame {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 playBtn.clearActions();
+                onClickPlay();
+                CrazyCrashCar.media.playSound("click.ogg");
             }
         });
     }
@@ -70,5 +73,23 @@ public class Intro extends StageGame {
         playBtn.setTouchable(Touchable.disabled);
         playBtn.addAction(Actions.alpha(0, 0.3f));
         title.addAction(Actions.moveTo(title.getX(), getHeight(), 0.5f, Interpolation.sineIn));
+
+        delayCall("delay", 0.7f);
     }
+
+    public  boolean keyUP(int keycode) {
+        if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.BACK) {
+            call(ON_BACK);
+            return true;
+        }
+        return super.keyUp(keycode);
+    }
+
+    protected void onDelayCall(String code) {
+        if (code.equals("delay")) {
+            call(ON_PLAY);
+        }
+    }
+
+
 }
