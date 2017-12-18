@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.I18NBundle;
 import com.boontaran.games.StageGame;
 import com.yevheniymoshnyk.crazycrashcar.media.Media;
 import com.yevheniymoshnyk.crazycrashcar.screens.Intro;
+import com.yevheniymoshnyk.crazycrashcar.screens.LevelList;
 import com.yevheniymoshnyk.crazycrashcar.utils.Data;
 import com.yevheniymoshnyk.crazycrashcar.utils.GameCallback;
 
@@ -48,6 +49,8 @@ public class CrazyCrashCar extends Game {
 	private Intro intro;
 
 	public static Data data;
+
+	private LevelList levelList;
 
 	public CrazyCrashCar(GameCallback gameCallback) {
 		this.gameCallback = gameCallback;
@@ -129,8 +132,8 @@ public class CrazyCrashCar extends Game {
 			@Override
 			public void call(int code) {
 				if (code == Intro.ON_PLAY) {
-					//showLevelList();
-					//hideIntro();
+					showLevelList();
+					hideIntro();
 				} else {
 					if (code == Intro.ON_BACK) {
 						exitApp();
@@ -138,10 +141,42 @@ public class CrazyCrashCar extends Game {
 				}
 			}
 		});
+
+		media.playMusic("music1.ogg", true);
 	}
 
 	private void hideIntro() {
 		intro = null;
+	}
+
+	private void showLevelList() {
+		levelList = new LevelList();
+		setScreen(levelList);
+
+		levelList.setCallback(new StageGame.Callback() {
+			@Override
+			public void call(int code) {
+				if (code == LevelList.ON_BACK) {
+					showIntro();
+					hideLevelList();
+				} else if (code == LevelList.ON_LEVEL_SELECTED) {
+					showLevelList();
+					hideLevelList();
+				} else if (code == LevelList.ON_OPEN_MARKET) {
+					gameCallback.sendMessage(OPEN_MARKET);
+				} else if (code == LevelList.ON_SHARE) {
+					gameCallback.sendMessage(SHARE);
+				}
+			}
+		});
+
+		gameCallback.sendMessage(SHOW_BANNER);
+		media.playMusic("music1.ogg", true);
+	}
+
+	private void hideLevelList() {
+		levelList = null;
+		gameCallback.sendMessage(HIDE_BANNER);
 	}
 
 

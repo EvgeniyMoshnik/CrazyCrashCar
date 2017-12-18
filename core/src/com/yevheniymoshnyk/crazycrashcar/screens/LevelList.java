@@ -1,8 +1,13 @@
 package com.yevheniymoshnyk.crazycrashcar.screens;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.boontaran.games.StageGame;
 import com.yevheniymoshnyk.crazycrashcar.CrazyCrashCar;
 import com.yevheniymoshnyk.crazycrashcar.media.LevelIcon;
@@ -29,7 +34,7 @@ public class LevelList extends StageGame {
         int row = 4, col = 4;
         float space = 20;
 
-        float iconWidht = 0, iconHeight = 0;
+        float iconWidth = 0, iconHeight = 0;
         int id = 1;
         int x, y;
 
@@ -40,12 +45,12 @@ public class LevelList extends StageGame {
                 LevelIcon icon = new LevelIcon(id);
                 container.addActor(icon);
 
-                if (iconWidht == 0) {
-                    iconWidht = icon.getWidth();
+                if (iconWidth == 0) {
+                    iconWidth = icon.getWidth();
                     iconHeight = icon.getHeight();
                 }
 
-                icon.setX(x * (iconWidht + space));
+                icon.setX(x * (iconWidth + space));
                 icon.setY(((row - 1) - y) * (iconHeight + space));
 
                 if (id <= progress) {
@@ -60,7 +65,7 @@ public class LevelList extends StageGame {
             }
         }
 
-        container.setWidth(col * iconWidht + (col - 1) * space);
+        container.setWidth(col * iconWidth + (col - 1) * space);
         container.setHeight(row * iconHeight + (row - 1) * space);
 
         container.setX(30);
@@ -68,5 +73,54 @@ public class LevelList extends StageGame {
 
         container.setColor(1, 1, 1, 0);
         container.addAction(Actions.alpha(1, 0.4f));
+
+        ImageButton rateBtn = new ImageButton(new TextureRegionDrawable(CrazyCrashCar.atlas.findRegion("rate")),
+                new TextureRegionDrawable(CrazyCrashCar.atlas.findRegion("rate_down")));
+        addChild(rateBtn);
+        rateBtn.setX(getWidth() - rateBtn.getWidth() - 20);
+        rateBtn.setY(getHeight() - rateBtn.getHeight() - 20);
+
+        rateBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                call(ON_OPEN_MARKET);
+            }
+        });
+
+        ImageButton shareBtn = new ImageButton(new TextureRegionDrawable(CrazyCrashCar.atlas.findRegion("share")),
+                new TextureRegionDrawable(CrazyCrashCar.atlas.findRegion("share_down")));
+        addChild(shareBtn);
+        shareBtn.setX(getWidth() - shareBtn.getWidth() - 20);
+        shareBtn.setY(20);
+
+        rateBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                call(ON_SHARE);
+            }
+        } );
+    }
+
+    public int getSelectedLevelId() {
+        return selectedLevelId;
+    }
+
+    private ClickListener iconListener = new ClickListener() {
+        @Override
+        public void clicked(InputEvent event, float x, float y) {
+            selectedLevelId = ((LevelIcon)event.getTarget()).getId();
+            CrazyCrashCar.media.playSound("click.ogg");
+            call(ON_LEVEL_SELECTED);
+        }
+    };
+
+    @Override
+    public boolean keyUp(int keycode) {
+        if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.BACK) {
+            CrazyCrashCar.media.playSound("click.ogg");
+            call(ON_BACK);
+            return true;
+        }
+        return super.keyUp(keycode);
     }
 }
