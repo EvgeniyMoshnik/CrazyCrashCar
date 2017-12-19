@@ -27,6 +27,7 @@ public class LevelIcon extends Group {
         hiliteImg = new Image(CrazyCrashCar.atlas.findRegion("level_icon_hilite"));
         addActor(hiliteImg);
         hiliteImg.setVisible(false);
+
         hiliteImg.setX((getWidth() - hiliteImg.getWidth())/2);
         hiliteImg.setY((getHeight() - hiliteImg.getHeight())/2);
 
@@ -52,7 +53,7 @@ public class LevelIcon extends Group {
         label.setX((getWidth() - label.getWidth())/2);
         label.setY((getHeight() - label.getHeight())/2);
 
-        //setLock(true);
+        setLock(true);
 
         addCaptureListener(new EventListener() {
             @Override

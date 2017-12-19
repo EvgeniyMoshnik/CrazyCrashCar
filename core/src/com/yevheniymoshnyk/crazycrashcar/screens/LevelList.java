@@ -54,6 +54,9 @@ public class LevelList extends StageGame {
                 icon.setY(((row - 1) - y) * (iconHeight + space));
 
                 if (id <= progress) {
+                    icon.setLock(false);
+                }
+                if (id <= progress) {
                     icon.setHilite();
                 }
                 if (Setting.DEBUG_GAME) {

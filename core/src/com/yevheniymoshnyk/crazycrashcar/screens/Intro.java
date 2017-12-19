@@ -48,7 +48,7 @@ public class Intro extends StageGame {
 
         addChild(playBtn);
         centerActorXY(playBtn);
-        playBtn.moveBy(0, 60);
+        playBtn.moveBy(0, -60);
 
         AlphaAction alphaAction = new AlphaAction();
         alphaAction.setActor(playBtn);
