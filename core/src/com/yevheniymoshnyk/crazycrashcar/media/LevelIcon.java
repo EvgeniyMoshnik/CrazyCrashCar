@@ -96,7 +96,6 @@ public class LevelIcon extends Group {
             setTouchable(Touchable.enabled);
         }
     }
-
     public void setHilite() {
         hiliteImg.setVisible(true);
         isHilited = true;
