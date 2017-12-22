@@ -170,6 +170,7 @@ public class CrazyCrashCar extends Game {
 			}
 		});
 
+
 		gameCallback.sendMessage(SHOW_BANNER);
 		media.playMusic("music1.ogg", true);
 	}
