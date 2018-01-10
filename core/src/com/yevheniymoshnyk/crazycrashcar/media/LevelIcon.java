@@ -28,12 +28,12 @@ public class LevelIcon extends Group {
         addActor(hiliteImg);
         hiliteImg.setVisible(false);
 
-        hiliteImg.setX((getWidth() - hiliteImg.getWidth())/2);
-        hiliteImg.setY((getHeight() - hiliteImg.getHeight())/2);
-
         bg = new Image(CrazyCrashCar.atlas.findRegion("level_icon_bg"));
         addActor(bg);
-        setSize(bg.getMaxWidth(), bg.getHeight());
+        setSize(bg.getWidth(), bg.getHeight());
+
+        hiliteImg.setX((getWidth() - hiliteImg.getWidth())/2);
+        hiliteImg.setY((getHeight() - hiliteImg.getHeight())/2);
 
         bgDown = new Image(CrazyCrashCar.atlas.findRegion("level_icon_bg_down"));
         addActor(bgDown);
