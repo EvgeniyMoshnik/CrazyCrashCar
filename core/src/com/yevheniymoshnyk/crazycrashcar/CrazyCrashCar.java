@@ -160,7 +160,7 @@ public class CrazyCrashCar extends Game {
 					showIntro();
 					hideLevelList();
 				} else if (code == LevelList.ON_LEVEL_SELECTED) {
-					showLevelList();
+					//showLevel();
 					hideLevelList();
 				} else if (code == LevelList.ON_OPEN_MARKET) {
 					gameCallback.sendMessage(OPEN_MARKET);
