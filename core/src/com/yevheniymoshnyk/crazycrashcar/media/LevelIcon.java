@@ -113,7 +113,7 @@ public class LevelIcon extends Group {
                     alphaUp = false;
                 }
             } else  {
-                alpha = delta * 4;
+                alpha -= delta * 4;
                 if (alpha < 0) {
                     alpha = 0;
                     alphaUp = true;
