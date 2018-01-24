@@ -56,7 +56,7 @@ public class LevelList extends StageGame {
                 if (id <= progress) {
                     icon.setLock(false);
                 }
-                if (id <= progress) {
+                if (id == progress) {
                     icon.setHilite();
                 }
                 if (Setting.DEBUG_GAME) {
@@ -86,6 +86,7 @@ public class LevelList extends StageGame {
         rateBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                CrazyCrashCar.media.playSound("click.ogg");
                 call(ON_OPEN_MARKET);
             }
         });
@@ -96,9 +97,10 @@ public class LevelList extends StageGame {
         shareBtn.setX(getWidth() - shareBtn.getWidth() - 20);
         shareBtn.setY(20);
 
-        rateBtn.addListener(new ClickListener() {
+        shareBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                CrazyCrashCar.media.playSound("click.ogg");
                 call(ON_SHARE);
             }
         } );
@@ -108,7 +110,7 @@ public class LevelList extends StageGame {
         return selectedLevelId;
     }
 
-    private ClickListener iconListener = new ClickListener() {
+    private ClickListener iconListener =  new ClickListener() {
         @Override
         public void clicked(InputEvent event, float x, float y) {
             selectedLevelId = ((LevelIcon)event.getTarget()).getId();

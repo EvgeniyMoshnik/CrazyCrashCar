@@ -34,7 +34,7 @@ public class Intro extends StageGame {
         title.setY(getHeight());
 
         MoveByAction move = new MoveByAction();
-        move.setAmount(0, title.getHeight() * 1.5f);
+        move.setAmount(0, -title.getHeight() * 1.5f);
         move.setDuration(0.4f);
         move.setInterpolation(Interpolation.swingOut);
         move.setActor(title);
@@ -72,7 +72,7 @@ public class Intro extends StageGame {
     private void onClickPlay() {
         playBtn.setTouchable(Touchable.disabled);
         playBtn.addAction(Actions.alpha(0, 0.3f));
-        title.addAction(Actions.moveTo(title.getX(), getHeight(), 0.5f, Interpolation.sineIn));
+        title.addAction(Actions.moveTo(title.getX(), getHeight(), 0.5f, Interpolation.swingIn));
 
         delayCall("delay", 0.7f);
     }
