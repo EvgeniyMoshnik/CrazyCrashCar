@@ -73,7 +73,7 @@ public class Player extends ActorClip implements IBody {
         isTouchGround = true;
     }
 
-    public boolean touchedGround() {
+    public boolean isTouchedGround() {
         if (jumpWait > 0) return false;
         return isTouchGround;
     }
