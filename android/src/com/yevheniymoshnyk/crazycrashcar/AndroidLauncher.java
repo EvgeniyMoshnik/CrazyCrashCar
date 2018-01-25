@@ -61,8 +61,7 @@ public class AndroidLauncher extends AndroidApplication {
 
 					}
 				});
-			} else {
-				if (message == CrazyCrashCar.HIDE_BANNER) {
+			} else if (message == CrazyCrashCar.HIDE_BANNER) {
 					AndroidLauncher.this.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -72,21 +71,18 @@ public class AndroidLauncher extends AndroidApplication {
 				} else if (message == CrazyCrashCar.LOAD_INTERSTITIAL) {
 
 					}
-					else {
-						if (message == CrazyCrashCar.SHOW_INTERSTITIAL) {
+					else if (message == CrazyCrashCar.SHOW_INTERSTITIAL) {
 							AndroidLauncher.this.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
 
 								}
 							});
-						} else {
-							if (message == CrazyCrashCar.OPEN_MARKET) {
+						} else if (message == CrazyCrashCar.OPEN_MARKET) {
 								Uri uri = Uri.parse(getString(R.string.share_uri));
 								Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 								startActivity(intent);
-							} else {
-								if (message == CrazyCrashCar.SHARE) {
+							} else if (message == CrazyCrashCar.SHARE) {
 									Intent sharingIntent = new Intent(Intent.ACTION_SEND);
 									sharingIntent.setType("text/plain");
 									String shareTitle = getString(R.string.share_title);
@@ -101,11 +97,11 @@ public class AndroidLauncher extends AndroidApplication {
 									startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)));
 
 								}
-							}
-						}
 
-				}
+
+
+
 			}
-		}
+
 	};
 }
