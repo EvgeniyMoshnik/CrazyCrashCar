@@ -61,7 +61,7 @@ public class Level extends StageGame {
 
     private JumpGauge jumpGauge;
 
-    private int mapWidth, mapHeight, tilePixelWidth, tilePixelHeight, mapPixelHeight, levelWidth, levelHeight;
+    private int mapWidth, mapHeight, tilePixelWidth, tilePixelHeight, levelWidth, levelHeight;
 
     private Player player;
     private Body finish;
@@ -494,6 +494,8 @@ public class Level extends StageGame {
     }
 
     private Array<Polygon> getTriangles(Polygon polygon) {
+        return null;
+
     }
 
     private void scaleToWorld(Polygon polygon) {
