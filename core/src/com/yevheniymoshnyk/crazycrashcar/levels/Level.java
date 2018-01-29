@@ -9,6 +9,7 @@ import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -27,6 +28,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ShortArray;
+import com.boontaran.MessageListener;
 import com.boontaran.games.StageGame;
 import com.boontaran.games.tiled.TileLayer;
 import com.yevheniymoshnyk.crazycrashcar.CrazyCrashCar;
@@ -36,6 +39,9 @@ import com.yevheniymoshnyk.crazycrashcar.controls.JumpGauge;
 import com.yevheniymoshnyk.crazycrashcar.player.IBody;
 import com.yevheniymoshnyk.crazycrashcar.player.Player;
 import com.yevheniymoshnyk.crazycrashcar.player.UserData;
+import com.yevheniymoshnyk.crazycrashcar.screens.LevelComplatedScreen;
+import com.yevheniymoshnyk.crazycrashcar.screens.LevelFailledScreen;
+import com.yevheniymoshnyk.crazycrashcar.screens.PausedScreen;
 import com.yevheniymoshnyk.crazycrashcar.utils.Setting;
 
 
@@ -86,7 +92,9 @@ public class Level extends StageGame {
 
     private TiledMap map;
 
-
+    private PausedScreen pausedScreen;
+    private LevelComplatedScreen levelComplatedScreen;
+    private LevelFailledScreen levelFailledScreen;
 
     public Level(String directory) {
         this.directory = directory;
@@ -208,10 +216,62 @@ public class Level extends StageGame {
                 }
             });
 
+        levelFailledScreen = new LevelFailledScreen(getWidth(), getHeight(),);
+        levelFailledScreen.addListener(new MessageListener() {
+            @Override
+            protected void receivedMessage(int message, Actor actor) {
+                if (message == LevelFailledScreen.ON_RETRY) {
+                    call(ON_RESTART);
+                } else {
+                    if (message == LevelFailledScreen.ON_QUIT) {
+                        quitLevel();
+                    }
+                }
+            }
+        });
+
+        levelComplatedScreen = new LevelComplatedScreen(getWidth(), getHeight());
+        levelComplatedScreen.addListener(new MessageListener() {
+            @Override
+            protected void receivedMessage(int message, Actor actor) {
+                if (message == LevelComplatedScreen.ON_DONE) {
+                    call(ON_COMPLETED);
+                }
+
+            }
+        });
+
+        pausedScreen = new PausedScreen(getWidth(), getHeight());
+        pausedScreen.addListener(new MessageListener() {
+            @Override
+            protected void receivedMessage(int message, Actor actor) {
+                if (message == PausedScreen.ON_RESUME) {
+                    CrazyCrashCar.media.playSound("click.ogg");
+                    resumeLevel();
+                } else {
+                    if (message == PausedScreen.ON_QUIT) {
+                        CrazyCrashCar.media.playSound("click.ogg");
+                        quitLevel();
+                    }
+                }
+            }
+        });
+
             setBackGround("level_bg");
             world.getBodies(bodies);
             
             updateCamera();
+    }
+
+    private void resumeLevel() {
+        state = PLAY;
+
+        pausedScreen.hide();
+        delayCall("resumelevel2", 0.6f);
+        showButtons();
+        call(ON_RESUME);
+
+        playMusic();
     }
 
     protected void  quitLevel() {
@@ -490,12 +550,78 @@ public class Level extends StageGame {
         shape.dispose();
     }
 
-    private void addPolygonLand(Array<Polygon> childs) {
+    private void addPolygonLand(Array<Polygon> triangles) {
+        BodyDef def = new BodyDef();
+        def.type = BodyDef.BodyType.StaticBody;
+        def.linearDamping = 0;
+
+        for (Polygon poly : triangles) {
+            FixtureDef fDef = new FixtureDef();
+            PolygonShape shape = new PolygonShape();
+            shape.set(poly.getTransformedVertices());
+
+            fDef.shape = shape;
+            fDef.restitution = LAND_RESTITUTION;
+            fDef.friction = 1;
+            fDef.density = 1;
+
+            Body body = world.createBody(def);
+            body.createFixture(fDef);
+            body.setUserData(new UserData(null, "land"));
+            shape.dispose();
+        }
     }
 
-    private Array<Polygon> getTriangles(Polygon polygon) {
-        return null;
+    public static Array<Polygon> getTriangles(Polygon polygon) {
+        Array<Polygon> trianglesPoly = new Array<Polygon>();
 
+        EarClippingTriangulator ear = new EarClippingTriangulator();
+        float vertices[] = polygon.getTransformedVertices();
+        ShortArray triangleIds = ear.computeTriangles(vertices);
+        Vector2 list[] = fromArray(vertices);
+
+        Polygon triangle;
+
+        int num = triangleIds.size/3;
+        Vector2 triPoints[];
+        int i, j;
+
+        for (i = 0; i < num; i++) {
+            triPoints = new Vector2[3];
+            for (j = 0; j < 3; j++) {
+                triPoints[j] = list[triangleIds.get(i * 3 + j)];
+            }
+            triangle = new Polygon(toArray(triPoints));
+
+            if (Math.abs(triangle.area()) > 0.001f) {
+                trianglesPoly.add(triangle);
+            }
+        }
+        return trianglesPoly;
+
+    }
+
+    public static Vector2[] fromArray(float vertices[]) {
+        int num = vertices.length/2;
+        int i;
+        Vector2 result[] = new Vector2[num];
+
+        for (i = 0; i < num; i++) {
+            result[i] = new Vector2(vertices[2 * i], vertices[2 * i + 1]);
+        }
+        return result;
+    }
+
+    public static float[] toArray(Vector2[] points) {
+        float vertices[] = new float[points.length * 2];
+        int i;
+
+        for (i = 0; i < points.length; i++) {
+            vertices[i * 2] = points[i].x;
+            vertices[i * 2 + 1] = points[i].y;
+
+        }
+        return vertices;
     }
 
     private void scaleToWorld(Polygon polygon) {
