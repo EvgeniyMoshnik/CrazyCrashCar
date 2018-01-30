@@ -125,6 +125,7 @@ public class Level extends StageGame {
     }
 
     private void resumeLevel2() {
+        removeOverlayChild(pausedScreen);
     }
 
     private void build() {
@@ -134,7 +135,7 @@ public class Level extends StageGame {
         world.setContactListener(contactListener);
         debugRenderer = new Box2DDebugRenderer();
 
-        //loadMap();
+        loadMap("tiled/" + directory + "/level.tmx");
 
         if (player == null) {
             throw new Error("player not defined");
@@ -143,7 +144,8 @@ public class Level extends StageGame {
            throw new Error("finish not defined");
         }
 
-        //addRectangleLand();
+        addRectangleLand(new Rectangle(-10, 0, 10, levelHeight));
+        addRectangleLand(new Rectangle(levelWidth + 10, 0, 10, levelHeight));
 
         int count = 60;
         while (count-- > 0) {
@@ -216,7 +218,7 @@ public class Level extends StageGame {
                 }
             });
 
-        levelFailledScreen = new LevelFailledScreen(getWidth(), getHeight(),);
+        levelFailledScreen = new LevelFailledScreen(getWidth(), getHeight());
         levelFailledScreen.addListener(new MessageListener() {
             @Override
             protected void receivedMessage(int message, Actor actor) {
@@ -624,10 +626,35 @@ public class Level extends StageGame {
         return vertices;
     }
 
-    private void scaleToWorld(Polygon polygon) {
+    public static void scaleToWorld(Polygon polygon) {
+        float[] vertices = polygon.getTransformedVertices();
+        scaleToWorld(vertices);
+    }
+
+    public static void scaleToWorld(float[] vertices) {
+        int i;
+
+        for (i = 0; i < vertices.length; i++) {
+            vertices[i] /= WORLD_SCALE;
+        }
     }
 
     private void updateCamera() {
+        camera.position.x = player.getX();
+        camera.position.y = player.getY();
+
+        if (camera.position.x - camera.viewportWidth / 2 < 0) {
+            camera.position.x = camera.viewportWidth / 2;
+        }
+        if (camera.position.x + camera.viewportWidth / 2 > levelWidth) {
+            camera.position.x  = levelWidth - camera.viewportWidth / 2;
+        }
+        if (camera.position.y - camera.viewportHeight / 2 < 0) {
+            camera.position.y = camera.viewportHeight / 2;
+        }
+        if (camera.position.y + camera.viewportHeight / 2 > levelHeight) {
+            camera.position.y  = levelHeight - camera.viewportHeight / 2;
+        }
     }
 
     public void addChild(Actor actor) {
@@ -663,8 +690,147 @@ public class Level extends StageGame {
     }
 
     private void levelCompleted() {
+        if (state == LEVEL_COMPLETED) return;;
+        state = LEVEL_COMPLETED;
+        stopMusic();
+        hideButtons();
+        addOverlayChild(levelComplatedScreen);
+        levelFailledScreen.start();
+
+        CrazyCrashCar.media.playSound("level_completed.ogg");
+        CrazyCrashCar.media.playMusic("level_win.ogg", false);
     }
 
     private void levelFailed() {
+        if (state == LEVEL_FAILED) return;
+        state = LEVEL_FAILED;
+        stopMusic();
+
+        addOverlayChild(levelComplatedScreen);
+        levelFailledScreen.start();
+
+        jumpGauge.setVisible(false);
+        hideButtons();
+
+        call(ON_FAILED);
+    }
+
+    private void pauseLevel() {
+        pauseLevel(true);
+    }
+
+    private void pauseLevel(boolean withDialog) {
+        if (state != PLAY) return;
+        state = PAUSED;
+
+        if (withDialog) {
+            addOverlayChild(pausedScreen);
+            pausedScreen.start();
+            hideButtons();
+        }
+
+        call(ON_PAUSED);
+        stopMusic();
+    }
+
+    @Override
+    public void pause() {
+        if (hasBeenBuilt && state == PLAY) {
+            pauseLevel();
+        }
+
+        super.pause();
+    }
+
+    @Override
+    public void resume() {
+        super.resume();
+    }
+
+    private void updateWorld(float delta) {
+        if (player.getRight() < levelWidth - 100) {
+            world.step(delta, 10, 10);
+        }
+
+        int i;
+        Body body;
+        UserData data;
+        for (i = 0; i < bodies.size; i++) {
+            body = bodies.get(i);
+
+            data = (UserData) body.getUserData();
+
+            if (data != null) {
+                Actor actor = data.actor;
+
+                if (actor != null) {
+                    actor.setPosition(body.getPosition().x + WORLD_SCALE, body.getPosition().y + WORLD_SCALE);
+                    actor.setRotation(body.getAngle() * 180 / 3.14f);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void update(float delta) {
+        super.update(delta);
+
+        if (musicName != null && !musicHasLoaded) {
+            if (CrazyCrashCar.media.update()) {
+                musicHasLoaded = true;
+                playMusic();
+            }
+        }
+        if (!hasBeenBuilt) {
+            return;
+        }
+
+        if (state == PLAY) {
+            jumpGauge.setX(getStageToOverlayX(player.getX()));
+            jumpGauge.setY(getStageToOverlayY(player.getY() + 67));
+
+            updateCamera();
+
+            if (player.getY() < -100) {
+                levelFailed();
+            }
+        }
+
+        if (state != PAUSED) {
+            float delta2 = 0.033f;
+            if (delta < delta2) {
+                delta2 = delta;
+
+                updateWorld(delta2);
+            }
+        }
+    }
+
+    @Override
+    public void render(float delta) {
+        super.render(delta);
+
+        if (Setting.DEBUG_WORLD) {
+            if (hasBeenBuilt) {
+                debugRenderer.render(world, camera.combined.cpy().scl(WORLD_SCALE));
+            }
+        }
+    }
+
+    public static Vector2 calculateCentroid(float vertices[]) {
+        Vector2[] points = fromArray(vertices);
+        float x = 0;
+        float y = 0;
+        int pointCount = points.length;
+        for (int i = 0; i < pointCount - 1; i++) {
+            final Vector2 point = points[i];
+            x += point.x;
+            y += point.y;
+        }
+
+        x = x / pointCount;
+        y = y / pointCount - 33;
+
+        return new Vector2(x, y);
     }
 }

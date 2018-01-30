@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.boontaran.games.StageGame;
+import com.yevheniymoshnyk.crazycrashcar.levels.Level;
 import com.yevheniymoshnyk.crazycrashcar.media.Media;
 import com.yevheniymoshnyk.crazycrashcar.screens.Intro;
 import com.yevheniymoshnyk.crazycrashcar.screens.LevelList;
@@ -51,6 +52,8 @@ public class CrazyCrashCar extends Game {
 	public static Data data;
 
 	private LevelList levelList;
+	private Level level;
+	private int lastLevelId;
 
 	public CrazyCrashCar(GameCallback gameCallback) {
 		this.gameCallback = gameCallback;
@@ -160,7 +163,7 @@ public class CrazyCrashCar extends Game {
 					showIntro();
 					hideLevelList();
 				} else if (code == LevelList.ON_LEVEL_SELECTED) {
-					//showLevel();
+					showLevel(levelList.getSelectedLevelId());
 					hideLevelList();
 				} else if (code == LevelList.ON_OPEN_MARKET) {
 					gameCallback.sendMessage(OPEN_MARKET);
@@ -178,6 +181,78 @@ public class CrazyCrashCar extends Game {
 	private void hideLevelList() {
 		levelList = null;
 		gameCallback.sendMessage(HIDE_BANNER);
+	}
+
+	private void showLevel(int id) {
+		media.stopMusic("music1.ogg");
+
+		lastLevelId = id;
+		switch (id) {
+			case 1:
+				level = new Level("level1");
+				break;
+			case 2:
+				level = new Level("level2");
+				break;
+			default:
+				level = new Level("level" + id);
+				break;
+		}
+
+		if (level.getMusicName() == null) {
+			level.setMusic("music2.ogg");
+		}
+		setScreen(level);
+
+		level.setCallback(new StageGame.Callback() {
+			@Override
+			public void call(int code) {
+				if (code == Level.ON_RESTART) {
+					gameCallback.sendMessage(HIDE_BANNER);
+					gameCallback.sendMessage(SHOW_INTERSTITIAL);
+					media.stopMusic("level_failed.ogg");
+					media.stopMusic("level_win.ogg");
+					hideLevel();
+					showLevel(lastLevelId);
+				} else if (code == Level.ON_QUIT) {
+					gameCallback.sendMessage(SHOW_INTERSTITIAL);
+					media.stopMusic("level_failed.ogg");
+					media.stopMusic("level_win.ogg");
+					hideLevel();
+					showLevelList();
+				} else if (code == Level.ON_COMPLETED) {
+					updateProgress();
+					gameCallback.sendMessage(SHOW_INTERSTITIAL);
+					gameCallback.sendMessage(SHOW_BANNER);
+					media.stopMusic("level_win.ogg");
+					hideLevel();
+					showLevelList();
+				} else if (code == Level.ON_PAUSED) {
+					gameCallback.sendMessage(SHOW_BANNER);
+
+				} else if (code == Level.ON_RESUME) {
+					gameCallback.sendMessage(HIDE_BANNER);
+
+				} else if (code == Level.ON_FAILED) {
+					gameCallback.sendMessage(SHOW_BANNER);
+					media.playMusic("level_failed.ogg", false);
+				}
+			}
+		});
+
+		gameCallback.sendMessage(LOAD_INTERSTITIAL);
+	}
+
+	private void hideLevel() {
+		level.dispose();
+		level = null;
+	}
+
+	protected void updateProgress() {
+		int newProgress = lastLevelId + 1;
+		if (newProgress > data.getProgress()) {
+			data.setProgress(newProgress);
+		}
 	}
 
 
