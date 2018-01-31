@@ -60,7 +60,7 @@ public class Player extends ActorClip implements IBody {
         driverImage = new Image(CrazyCrashCar.atlas.findRegion("astronaut"));
         childs.addActor(driverImage);
         driverImage.setX(-35);
-        driverImage.setY(28);
+        driverImage.setY(20);
 
         driverFallCont = new Group();
 
@@ -263,11 +263,11 @@ public class Player extends ActorClip implements IBody {
         float maxAV = 18;
 
         if (moveFrontKey) {
-            if (rearWheel.getAngularVelocity() < maxAV) {
-                rearWheel.applyTorque(torque, true);
+            if (-rearWheel.getAngularVelocity() < maxAV) {
+                rearWheel.applyTorque(-torque, true);
             }
-            if (frontWheel.getAngularVelocity() < maxAV) {
-                frontWheel.applyTorque(torque, true);
+            if (-frontWheel.getAngularVelocity() < maxAV) {
+                frontWheel.applyTorque(-torque, true);
             }
         }
         if (moveBackKey) {
@@ -304,7 +304,7 @@ public class Player extends ActorClip implements IBody {
     public void act(float delta) {
 
         if (jumpWait > 0) {
-            jumpWait = delta;
+            jumpWait -= delta;
         }
 
         if (destroyOnNextUpdate) {

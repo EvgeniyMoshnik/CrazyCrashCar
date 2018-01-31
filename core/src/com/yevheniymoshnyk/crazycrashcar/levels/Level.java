@@ -407,7 +407,7 @@ public class Level extends StageGame {
 
         map = new TmxMapLoader().load(tmxFile, params);
 
-        MapProperties prop = new MapProperties();
+        MapProperties prop = map.getProperties();
         mapWidth = prop.get("width", Integer.class);
         mapHeight = prop.get("height", Integer.class);
         tilePixelWidth = prop.get("tilewidth", Integer.class);
@@ -636,9 +636,8 @@ public class Level extends StageGame {
     }
 
     public static void scaleToWorld(float[] vertices) {
-        int i;
 
-        for (i = 0; i < vertices.length; i++) {
+        for (int i = 0; i < vertices.length; i++) {
             vertices[i] /= WORLD_SCALE;
         }
     }
@@ -768,7 +767,7 @@ public class Level extends StageGame {
                 Actor actor = data.actor;
 
                 if (actor != null) {
-                    actor.setPosition(body.getPosition().x + WORLD_SCALE, body.getPosition().y + WORLD_SCALE);
+                    actor.setPosition(body.getPosition().x * WORLD_SCALE, body.getPosition().y * WORLD_SCALE);
                     actor.setRotation(body.getAngle() * 180 / 3.14f);
                 }
             }
