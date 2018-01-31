@@ -13,9 +13,11 @@ import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
+import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
+import com.boontaran.douglasPeucker.DouglasPeucker;
 import com.boontaran.games.ActorClip;
 import com.boontaran.marchingSquare.MarchingSquare;
 import com.yevheniymoshnyk.crazycrashcar.CrazyCrashCar;
@@ -85,6 +87,26 @@ public class Player extends ActorClip implements IBody {
         def.type = BodyDef.BodyType.DynamicBody;
         def.linearDamping = 0;
 
+        float[] vertices = traceOutline("rover_model");
+        Vector2 centroid = Level.calculateCentroid(vertices);
+
+        int i = 0;
+        while (i < vertices.length) {
+            vertices[i] -= centroid.x;
+            vertices[i + 1] -= centroid.y;
+            i += 2;
+        }
+
+        vertices = DouglasPeucker.simplify(vertices, 4);
+        Level.scaleToWorld(vertices);
+        Array<Polygon> triangles = Level.getTriangles(new Polygon(vertices));
+
+        car = createBodyFromTriangles(world, triangles);
+        car.setTransform((getX()) / Level.WORLD_SCALE, (getY()) / Level.WORLD_SCALE, 0);
+
+        frontWheel = createWheel(world, 20 / Level.WORLD_SCALE);
+        frontWheel.setTransform(car.getPosition().x + 60 / Level.WORLD_SCALE, car.getPosition().y - 8 / Level.WORLD_SCALE, 0);
+
         frontWheelCont = new Group();
         frontWheelImage = new Image(CrazyCrashCar.atlas.findRegion("front_wheel"));
 
@@ -102,6 +124,10 @@ public class Player extends ActorClip implements IBody {
         rDef.initialize(car, frontWheel, new Vector2(frontWheel.getPosition()));
         frontWheelJoint = world.createJoint(rDef);
 
+        rearWheel = createWheel(world, 20 / Level.WORLD_SCALE);
+        rearWheel.setTransform(car.getPosition().x - 62 / Level.WORLD_SCALE, car.getPosition().y - 8 / Level.WORLD_SCALE, 0);
+        rDef = new RevoluteJointDef();
+
         rearWheelCont = new Group();
         rearWheelImage = new Image(CrazyCrashCar.atlas.findRegion("rear_wheel"));
 
@@ -117,6 +143,26 @@ public class Player extends ActorClip implements IBody {
 
         rDef.initialize(car, rearWheel, new Vector2(rearWheel.getPosition()));
         rearWheelJoint = world.createJoint(rDef);
+
+        vertices = traceOutline("astronaut_model");
+        centroid = Level.calculateCentroid(vertices);
+
+        i = 0;
+        while (i < vertices.length) {
+            vertices[i] -= centroid.x;
+            vertices[i + 1] -= centroid.y;
+
+            i+= 2;
+        }
+        vertices = DouglasPeucker.simplify(vertices, 6);
+        Level.scaleToWorld(vertices);
+        triangles = Level.getTriangles(new Polygon(vertices));
+        driver = createBodyFromTriangles(world, triangles);
+        driver.setTransform(car.getPosition().x - 0 / Level.WORLD_SCALE, car.getPosition().y + 30/ Level.WORLD_SCALE, 0);
+
+        WeldJointDef driverDef = new WeldJointDef();
+        driverDef.initialize(car, driver, new Vector2(driver.getPosition()));
+        driverJoint = world.createJoint(driverDef);
 
 
         return car;

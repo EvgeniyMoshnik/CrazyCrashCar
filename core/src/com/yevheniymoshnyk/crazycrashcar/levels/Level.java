@@ -1,5 +1,6 @@
 package com.yevheniymoshnyk.crazycrashcar.levels;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -110,6 +111,9 @@ public class Level extends StageGame {
     protected void onDelayCall(String code) {
         if (code.equals("build_level")) {
             build();
+
+            removeOverlayChild(pleaseWait);
+
         } else {
             if (code.equals("resumeLevel2")) {
                 resumeLevel2();
@@ -785,7 +789,13 @@ public class Level extends StageGame {
             return;
         }
 
+        boolean lFront = joyStick.isRight();
+        boolean lBack = joyStick.isLeft();
+
         if (state == PLAY) {
+
+            player.onKey(lFront, lBack);
+
             jumpGauge.setX(getStageToOverlayX(player.getX()));
             jumpGauge.setY(getStageToOverlayY(player.getY() + 67));
 
@@ -832,5 +842,15 @@ public class Level extends StageGame {
         y = y / pointCount - 33;
 
         return new Vector2(x, y);
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.BACK) {
+            CrazyCrashCar.media.playSound("click.ogg");
+            pauseLevel();
+        }
+
+        return super.keyUp(keycode);
     }
 }
