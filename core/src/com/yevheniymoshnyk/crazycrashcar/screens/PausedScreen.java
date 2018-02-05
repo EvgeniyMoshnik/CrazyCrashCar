@@ -22,7 +22,7 @@ public class PausedScreen extends Group {
     private Image title;
     private ImageButton quit, resume;
 
-    private float w, h;
+   private float w, h;
 
     public PausedScreen(float w, float h) {
         this.w = w;

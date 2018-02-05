@@ -135,7 +135,7 @@ public class Level extends StageGame {
     private void build() {
         hasBeenBuilt = true;
 
-        world = new World(new Vector2(0, Setting.GRAVITY), true);
+        world = new World(new Vector2(0, -Setting.GRAVITY), true);
         world.setContactListener(contactListener);
         debugRenderer = new Box2DDebugRenderer();
 

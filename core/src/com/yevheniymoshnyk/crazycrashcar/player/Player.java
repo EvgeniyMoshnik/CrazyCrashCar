@@ -44,7 +44,7 @@ public class Player extends ActorClip implements IBody {
 
     private boolean isTouchGround = true;
 
-    private float jumpImpulse = Setting.JUMP_IMPULS;
+    private float jumpImpulse = Setting.JUMP_IMPULSE;
     private float jumpWait = 0;
 
     private Level level;
@@ -248,7 +248,7 @@ public class Player extends ActorClip implements IBody {
             shape.set(triangle.getTransformedVertices());
 
             fDef.shape = shape;
-            fDef.restitution = 0;
+            fDef.restitution = 0.3f;
             fDef.density = 1;
 
             body.createFixture(fDef);

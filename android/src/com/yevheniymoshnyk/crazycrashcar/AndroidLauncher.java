@@ -2,6 +2,7 @@ package com.yevheniymoshnyk.crazycrashcar;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +12,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
-import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
-import com.yevheniymoshnyk.crazycrashcar.CrazyCrashCar;
+import com.google.android.gms.ads.InterstitialAd;
 import com.yevheniymoshnyk.crazycrashcar.utils.GameCallback;
+import com.yevheniymoshnyk.crazycrashcar.utils.Setting;
 
 public class AndroidLauncher extends AndroidApplication {
 
@@ -24,6 +28,10 @@ public class AndroidLauncher extends AndroidApplication {
 	private ViewGroup bannerContainer;
 	private RelativeLayout.LayoutParams bannerParams;
 
+	private InterstitialAd interstitial;
+	private boolean interstitialHasInited = false;
+
+	private boolean enableAdmobIntertitials;
 
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
@@ -47,6 +55,13 @@ public class AndroidLauncher extends AndroidApplication {
 		mainView.addView(bannerContainer, bannerParams);
 		bannerContainer.setVisibility(View.GONE);
 
+		if (Setting.ADMOB_INTERSTITIAL == null) {
+			enableAdmobIntertitials = false;
+		} else {
+			enableAdmobIntertitials = true;
+		}
+
+		new AdmobBannerTask().execute();
 
 	}
 
@@ -58,6 +73,7 @@ public class AndroidLauncher extends AndroidApplication {
 				AndroidLauncher.this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
+						showBanner();
 
 					}
 				});
@@ -65,17 +81,18 @@ public class AndroidLauncher extends AndroidApplication {
 					AndroidLauncher.this.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-
+							hideBanner();
 						}
 					});
 				} else if (message == CrazyCrashCar.LOAD_INTERSTITIAL) {
+				    loadAdmobInterstitial();
 
-					}
-					else if (message == CrazyCrashCar.SHOW_INTERSTITIAL) {
+
+					} else if (message == CrazyCrashCar.SHOW_INTERSTITIAL) {
 							AndroidLauncher.this.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-
+									showAdmobInterstitial();
 								}
 							});
 						} else if (message == CrazyCrashCar.OPEN_MARKET) {
@@ -95,13 +112,123 @@ public class AndroidLauncher extends AndroidApplication {
 									sharingIntent.putExtra(Intent.EXTRA_SUBJECT, body);
 
 									startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)));
-
 								}
+			}
+	};
 
+	private class AdmobBannerTask extends AsyncTask<Void, Void, AdView> {
+		@Override
+		protected AdView doInBackground(Void... params) {
 
+            AdView adView = null; //???
 
+			return adView;
 
+        }
+
+		@Override
+		protected void onPostExecute(AdView adView) {
+
+            new AdView(AndroidLauncher.this); //??
+
+			bannerView = adView;
+			bannerView.setAdSize(AdSize.BANNER);
+			bannerView.setAdUnitId(Setting.ADMOB_BANNER);
+
+			AdRequest adRequest = new AdRequest.Builder()
+					.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+					.addTestDevice(Setting.TEST_DEVICE)
+					.build();
+
+			bannerView.setAdListener(bannerListener);
+			bannerView.loadAd(adRequest);
+		}
+	}
+
+	private AdListener bannerListener = new AdListener() {
+		@Override
+		public void onAdFailedToLoad(int i) {
+			super.onAdFailedToLoad(i);
+		}
+
+		@Override
+		public void onAdLoaded() {
+
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT
+			);
+			lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
+
+			if (bannerView.getParent() == null) {
+				bannerContainer.addView(bannerView, lp);
+			}
+			super.onAdLoaded();
+		}
+	};
+
+	private void showBanner() {
+		bannerContainer.setVisibility(View.VISIBLE);
+	}
+
+	private void hideBanner() {
+		bannerContainer.setVisibility(View.GONE);
+	}
+
+	private void loadAdmobInterstitial() {
+		if (interstitialHasInited) return;
+		interstitialHasInited = true;
+
+		if (!enableAdmobIntertitials) {
+			return;
+		}
+
+		new AdmobInterstitialTask().execute();
+	}
+
+	private void showAdmobInterstitial() {
+		if (interstitial == null) return;
+
+		if (interstitial.isLoaded()) {
+			interstitial.show();
+			interstitialHasInited = false;
+		}
+	}
+
+	private class AdmobInterstitialTask extends AsyncTask<Void, Void, AdRequest> {
+		@Override
+		protected AdRequest doInBackground(Void... params) {
+			AdRequest adRequest = new AdRequest.Builder()
+					.addTestDevice(Setting.TEST_DEVICE)
+					.build();
+
+			if (interstitial != null) {
+				return adRequest;
 			}
 
+			interstitial = new InterstitialAd(AndroidLauncher.this);
+			interstitial.setAdUnitId(Setting.ADMOB_INTERSTITIAL);
+			interstitial.setAdListener(interstitialListener);
+
+			return adRequest;
+		}
+
+		@Override
+		protected void onPostExecute(AdRequest adRequest) {
+			if (adRequest == null) return;
+			interstitial.loadAd(adRequest);
+		}
+	}
+
+	private AdListener interstitialListener = new AdListener() {
+		@Override
+		public void onAdFailedToLoad(int i) {
+			interstitialHasInited = false;
+		}
+
+		@Override
+		public void onAdLoaded() {
+
+		}
 	};
 }

@@ -71,7 +71,7 @@ public class JoyStick extends Group {
     }
 
     private void handleTouch(float x, float y) {
-        if (x < getWidth()/2) {
+        if (x > getWidth()/2) {
             setDir(RIGHT);
         } else {
             setDir(LEFT);
