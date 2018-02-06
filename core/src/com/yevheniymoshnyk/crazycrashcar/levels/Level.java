@@ -41,7 +41,7 @@ import com.yevheniymoshnyk.crazycrashcar.player.IBody;
 import com.yevheniymoshnyk.crazycrashcar.player.Player;
 import com.yevheniymoshnyk.crazycrashcar.player.UserData;
 import com.yevheniymoshnyk.crazycrashcar.screens.LevelComplatedScreen;
-import com.yevheniymoshnyk.crazycrashcar.screens.LevelFailledScreen;
+import com.yevheniymoshnyk.crazycrashcar.screens.LevelFailedScreen;
 import com.yevheniymoshnyk.crazycrashcar.screens.PausedScreen;
 import com.yevheniymoshnyk.crazycrashcar.utils.Setting;
 
@@ -95,7 +95,7 @@ public class Level extends StageGame {
 
     private PausedScreen pausedScreen;
     private LevelComplatedScreen levelComplatedScreen;
-    private LevelFailledScreen levelFailledScreen;
+    private LevelFailedScreen levelFailedScreen;
 
     public Level(String directory) {
         this.directory = directory;
@@ -222,14 +222,14 @@ public class Level extends StageGame {
                 }
             });
 
-        levelFailledScreen = new LevelFailledScreen(getWidth(), getHeight());
-        levelFailledScreen.addListener(new MessageListener() {
+        levelFailedScreen = new LevelFailedScreen(getWidth(), getHeight());
+        levelFailedScreen.addListener(new MessageListener() {
             @Override
             protected void receivedMessage(int message, Actor actor) {
-                if (message == LevelFailledScreen.ON_RETRY) {
+                if (message == LevelFailedScreen.ON_RETRY) {
                     call(ON_RESTART);
                 } else {
-                    if (message == LevelFailledScreen.ON_QUIT) {
+                    if (message == LevelFailedScreen.ON_QUIT) {
                         quitLevel();
                     }
                 }
@@ -698,7 +698,7 @@ public class Level extends StageGame {
         stopMusic();
         hideButtons();
         addOverlayChild(levelComplatedScreen);
-        levelFailledScreen.start();
+        levelFailedScreen.start();
 
         CrazyCrashCar.media.playSound("level_completed.ogg");
         CrazyCrashCar.media.playMusic("level_win.ogg", false);
@@ -710,7 +710,7 @@ public class Level extends StageGame {
         stopMusic();
 
         addOverlayChild(levelComplatedScreen);
-        levelFailledScreen.start();
+        levelFailedScreen.start();
 
         jumpGauge.setVisible(false);
         hideButtons();

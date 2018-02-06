@@ -12,7 +12,7 @@ import com.boontaran.MessageEvent;
 import com.yevheniymoshnyk.crazycrashcar.CrazyCrashCar;
 
 
-public class LevelFailledScreen extends Group {
+public class LevelFailedScreen extends Group {
 
     public static final int ON_RETRY = 1;
     public static final int ON_QUIT = 2;
@@ -21,7 +21,7 @@ public class LevelFailledScreen extends Group {
     private ImageButton retry, quit;
     private float w, h;
 
-    public LevelFailledScreen(float w, float h) {
+    public LevelFailedScreen(float w, float h) {
         this.w = w;
         this.h = h;
 

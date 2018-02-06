@@ -29,8 +29,8 @@ public class PausedScreen extends Group {
         this.h = h;
 
         title = new Image(CrazyCrashCar.atlas.findRegion("paused"));
-        title.setX((w - title.getWidth() / 2));
-        title.setX(h);
+        title.setX((w - title.getWidth()) / 2);
+        title.setY(h);
         addActor(title);
 
         resume = new ImageButton(new TextureRegionDrawable(CrazyCrashCar.atlas.findRegion("play_btn")),
@@ -47,7 +47,7 @@ public class PausedScreen extends Group {
             }
         });
 
-        quit = new ImageButton(new TextureRegionDrawable(CrazyCrashCar.atlas.findRegion("qiut_btn")),
+        quit = new ImageButton(new TextureRegionDrawable(CrazyCrashCar.atlas.findRegion("quit_btn")),
                 new TextureRegionDrawable(CrazyCrashCar.atlas.findRegion("quit_btn_down")));
 
         addActor(quit);
